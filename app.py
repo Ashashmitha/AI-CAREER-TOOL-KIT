@@ -1,20 +1,18 @@
 import streamlit as st
-import subprocess
+import resume
+import portfolio
+import cover_letter
 
-st.title("AI Career Toolkit")
-
-st.write("Choose a tool")
-
-option = st.selectbox(
-    "Select Tool",
-    ("Resume Builder", "Portfolio Generator", "Cover Letter Generator")
+option = st.sidebar.selectbox(
+    "Choose Tool",
+    ["Resume Builder", "Portfolio Generator", "Cover Letter Generator"]
 )
 
 if option == "Resume Builder":
-    subprocess.run(["streamlit", "run", "resume.py"])
+    resume.main()
 
 elif option == "Portfolio Generator":
-    subprocess.run(["streamlit", "run", "portfolio.py"])
+    portfolio.main()
 
 elif option == "Cover Letter Generator":
-    subprocess.run(["streamlit", "run", "cover_letter.py"])
+    cover_letter.main()
