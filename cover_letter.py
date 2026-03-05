@@ -10,33 +10,36 @@ from datetime import date
 # ---------------- CONFIG ----------------
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-st.set_page_config(page_title="AI Cover Letter Generator", layout="centered")
-st.title("✉️ AI Cover Letter Generator")
+def main():
 
-# ---------------- USER INPUT ----------------
-name = st.text_input("Full Name")
-email = st.text_input("Email")
-phone = st.text_input("Contact Number")
-linkedin = st.text_input("LinkedIn URL (optional)")
-github = st.text_input("GitHub URL (optional)")
+    st.set_page_config(page_title="AI Cover Letter Generator", layout="centered")
+    st.title("✉️ AI Cover Letter Generator")
 
-company = st.text_input("Company Name")
-role = st.text_input("Job Role / Internship Role")
+    # ---------------- USER INPUT ----------------
+    name = st.text_input("Full Name")
+    email = st.text_input("Email")
+    phone = st.text_input("Contact Number")
+    linkedin = st.text_input("LinkedIn URL (optional)")
+    github = st.text_input("GitHub URL (optional)")
 
-option = st.selectbox("Are you applying for:", ["Internship", "Full-time Job"])
+    company = st.text_input("Company Name")
+    role = st.text_input("Job Role / Internship Role")
 
-experience = ""
-if option == "Full-time Job":
-    experience = st.text_area("Brief Work Experience")
+    option = st.selectbox("Are you applying for:", ["Internship", "Full-time Job"])
 
-skills = st.text_area("Key Skills")
-projects = st.text_area("Key Projects")
+    experience = ""
+    if option == "Full-time Job":
+        experience = st.text_area("Brief Work Experience")
 
-# ---------------- GENERATE ----------------
-if st.button("Generate Cover Letter"):
-    if name and company and role and skills:
+    skills = st.text_area("Key Skills")
+    projects = st.text_area("Key Projects")
 
-        prompt = f"""
+    # ---------------- GENERATE ----------------
+    if st.button("Generate Cover Letter"):
+
+        if name and company and role and skills:
+
+            prompt = f"""
 Write a professional one-page cover letter.
 
 Tone: formal, professional, ATS-friendly.
@@ -70,47 +73,56 @@ Skills: {skills}
 Projects: {projects}
 """
 
-        response = client.models.generate_content(
-            model="gemini-flash-latest",
-            contents=prompt
-        )
-
-        cover_text = response.text
-        st.subheader("Generated Cover Letter")
-        st.text(cover_text)
-
-        # ---------------- PDF CREATION ----------------
-        def create_pdf(text):
-            buffer = io.BytesIO()
-            doc = SimpleDocTemplate(
-                buffer,
-                pagesize=A4,
-                rightMargin=50,
-                leftMargin=50,
-                topMargin=50,
-                bottomMargin=50
+            response = client.models.generate_content(
+                model="gemini-flash-latest",
+                contents=prompt
             )
 
-            styles = getSampleStyleSheet()
-            normal = styles["Normal"]
+            cover_text = response.text
 
-            story = []
-            for para in text.split("\n"):
-                story.append(Paragraph(para, normal))
-                story.append(Spacer(1, 10))
+            st.subheader("Generated Cover Letter")
+            st.text(cover_text)
 
-            doc.build(story)
-            buffer.seek(0)
-            return buffer
+            # ---------------- PDF CREATION ----------------
+            def create_pdf(text):
 
-        pdf_file = create_pdf(cover_text)
+                buffer = io.BytesIO()
 
-        st.download_button(
-            "📥 Download Cover Letter PDF",
-            data=pdf_file,
-            file_name="Cover_Letter.pdf",
-            mime="application/pdf"
-        )
+                doc = SimpleDocTemplate(
+                    buffer,
+                    pagesize=A4,
+                    rightMargin=50,
+                    leftMargin=50,
+                    topMargin=50,
+                    bottomMargin=50
+                )
 
-    else:
-        st.warning("Please fill all required fields.")
+                styles = getSampleStyleSheet()
+                normal = styles["Normal"]
+
+                story = []
+
+                for para in text.split("\n"):
+                    story.append(Paragraph(para, normal))
+                    story.append(Spacer(1, 10))
+
+                doc.build(story)
+                buffer.seek(0)
+
+                return buffer
+
+            pdf_file = create_pdf(cover_text)
+
+            st.download_button(
+                "📥 Download Cover Letter PDF",
+                data=pdf_file,
+                file_name="Cover_Letter.pdf",
+                mime="application/pdf"
+            )
+
+        else:
+            st.warning("Please fill all required fields.")
+
+
+if __name__ == "__main__":
+    main()
