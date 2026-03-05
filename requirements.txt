@@ -1,6 +1,3 @@
 streamlit
-google-generativeai
-pandas
-python-docx
+google-genai
 reportlab
-httpx
